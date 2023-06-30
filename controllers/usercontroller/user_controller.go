@@ -27,6 +27,14 @@ func CreateUser(c *fiber.Ctx) error {
 		return err
 	}
 
+	// Checking user if the email already exists
+	var existsUser models.User
+	if err := connection.DB.Where("email = ?", user.Email).First(&existsUser).Error; err == nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Sorry but email has already been taken",
+		})
+	}
+
 	// Save the user in the database
 	err := connection.DB.Create(&user).Error
 	if err != nil {
